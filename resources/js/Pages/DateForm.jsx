@@ -11,7 +11,7 @@ export default function DateForm() {
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h5" gutterBottom>
-        MUI Date Picker with Day.js
+        MUI Date Picker with Day js
       </Typography>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker

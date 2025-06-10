@@ -1,10 +1,11 @@
 name: laravel
 type: laravel
 docroot: public
-php_version: "8.3"
-webserver_type: nginx-fpm
+php_version: "8.2"
+webserver_type: apache-fpm
 router_http_port: "80"
 router_https_port: "443"
+use_https: true
 xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
@@ -15,13 +16,12 @@ use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
 corepack_enable: false
-nodejs_version: "20"
+nodejs_version: "20.13.1"
 web_extra_exposed_ports:
   - name: vite
     container_port: 5173
     http_port: 5172
     https_port: 5173
-
 
 # Key features of DDEV's config.yaml:
 
