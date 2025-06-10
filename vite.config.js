@@ -13,11 +13,11 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,
-        origin: 'https://laravel.ddev.site:5173',
+        origin: 'http://laravel.ddev.site:5173' || 'http://localhost:5173',
         cors: true,
         hmr: {
             protocol: 'wss',
-            host: 'laravel.ddev.site',
+            host: 'laravel.ddev.site' || 'localhost',
             clientPort: 5173,
         },
     },

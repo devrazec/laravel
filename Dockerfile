@@ -1,26 +1,26 @@
-FROM php:8.2-apache AS laravel
-
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    libzip-dev \
-    zip
-
-# Enable mod_rewrite
-RUN a2enmod rewrite
-
-# Install PHP extensions
-RUN docker-php-ext-install zip
-
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# Copy the application code
-COPY . /var/www/html
+FROM node:20 AS js-builder
 
 # Set the working directory
 WORKDIR /var/www/html
+
+# Copy the package dependencies
+COPY package-lock.json ./
+COPY package.json ./
+
+# Install project dependencies
+RUN npm ci install
+
+# Copy the application code
+COPY . .
+
+RUN npm run build
+
+FROM dwchiang/nginx-php-fpm:latest
+
+# Set the working directory
+WORKDIR /var/www/html
+
+COPY . .
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -29,8 +29,18 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod o+w ./storage/ -R
+RUN chmod o+w ./public/ -R
+RUN chmod o+w ./bootstrap/cache/ -R
+RUN chmod o+w ./database/ -R
+
+# Copy the js project build
+COPY --from=js-builder /var/www/html/public/build ./public/build
+
+RUN php artisan migrate:fresh
+RUN php artisan db:seed
+
+ENV DOCUMENT_ROOT=/var/www/html/public
 
 EXPOSE 8080
-EXPOSE 5172
 EXPOSE 5173
