@@ -1,6 +1,4 @@
-# laravel 12 + Breeze + Rreact
-
-- Project Laravel Breeze React
+# DDEV + Laravel 12 + Breeze + React + Vite + SQLite
 
 # Update DDEV
 - brew upgrade ddev
@@ -9,42 +7,12 @@
 
 # Start Docker
 
-- ddev config --project-type=laravel --docroot=public
+- ddev config --project-type=laravel
 
 - Edit .ddev/config.yaml
 
-- ddev start
-
-- ddev describe
-- - https://laravel.ddev.site 
-
-- Move the .git folder to .ddev/git folder
-
-- ddev composer create laravel/laravel .
-- ddev composer require laravel/breeze --dev
-- ddev artisan breeze:install react
-- ddev npm install
-- ddev npm run dev
-- ddev artisan migrate:fresh
-
-- Move back the .git folder to the ./
-
-- ddev npm install @mui/material @emotion/react @emotion/styled
-- ddev npm install @mui/icons-material
-- ddev npm install @mui/x-data-grid
-- ddev npm install @mui/x-date-pickers
-- ddev npm install dayjs
-
-# laravel 11 + Breeze + Rreact
-
-- mkdir laravel11
-
-- ddev config
-- ddev start
-- Edit .ddev/config.yaml
-
-name: laravel11
-type: php
+name: laravel
+type: laravel
 docroot: public
 php_version: "8.2"
 webserver_type: apache-fpm
@@ -68,12 +36,20 @@ web_extra_exposed_ports:
     http_port: 5172
     https_port: 5173
 
-- ddev composer create laravel/laravel:^11.0 .
+- ddev start
+
+- ddev describe
+- https://laravel.ddev.site 
 
 - Edit .env file
 
 APP_NAME=Laravel
-APP_URL=https://laravel11.ddev.site
+APP_URL=https://laravel.ddev.site
+
+DB_CONNECTION=sqlite
+DB_DATABASE=./database/database.sqlite
+
+or 
 
 DB_CONNECTION=mysql
 DB_HOST=ddev-laravel11-db
@@ -82,11 +58,17 @@ DB_DATABASE=db
 DB_USERNAME=root
 DB_PASSWORD=root
 
-- ddev exec php artisan migrate:fresh
-- ddev exec php artisan db:seed
+- Move the .git folder to .ddev/git folder
 
+- ddev composer create laravel/laravel .
 - ddev composer require laravel/breeze --dev
-- ddev exec artisan breeze:install react
+- ddev artisan breeze:install react
+- ddev npm install
+- ddev npm run dev
+- ddev artisan migrate:fresh
+- ddev artisan db:seed
+
+- Move back the .git folder to the ./
 
 - ddev npm install @mui/material @emotion/react @emotion/styled
 - ddev npm install @mui/icons-material
@@ -94,19 +76,21 @@ DB_PASSWORD=root
 - ddev npm install @mui/x-date-pickers
 - ddev npm install dayjs
 
+
 - Edit vite.config.js
 
     server: {
         host: '0.0.0.0',
         port: 5173,
         strictPort: true,
-        origin: 'https://laravel11.ddev.site:5173',
+        origin: 'https://laravel.ddev.site:5173',
         cors: true,
         hmr: {
             protocol: 'wss',
-            host: 'laravel11.ddev.site',
+            host: 'laravel.ddev.site',
             clientPort: 5173,
         },
     },
 
 - ddev exec npm run dev
+- ddev exec npm run build
