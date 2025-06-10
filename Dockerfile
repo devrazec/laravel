@@ -32,3 +32,5 @@ RUN composer install
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 8080
+EXPOSE 5172
+EXPOSE 5173
