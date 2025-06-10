@@ -1,0 +1,14 @@
+version: "3.5"
+
+services:
+
+  laravel:
+    container_name: laravel
+    hostname: laravel.local
+    restart: unless-stopped
+    image: laravel
+    ports:
+      - 8080:8080
+
+    networks:
+      - default

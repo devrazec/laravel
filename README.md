@@ -94,3 +94,14 @@ DB_PASSWORD=root
 
 - ddev exec npm run dev
 - ddev exec npm run build
+
+# Docker
+
+docker build -t laravel -f Dockerfile .
+
+docker run -itd \
+  --restart unless-stopped \
+  --name laravel \
+  --hostname laravel.local \
+  -p 8080:8080 \
+  laravel
