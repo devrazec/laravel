@@ -1,16 +1,32 @@
 name: laravel
 type: laravel
-php_version: "8.3"
+docroot: public
+php_version: "8.2"
 webserver_type: apache-fpm
+router_http_port: "80"
 use_https: false
 xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
+database:
+    type: mariadb
+    version: "10.11"
 use_dns_when_possible: true
 composer_version: "2"
 web_environment: []
 corepack_enable: false
 nodejs_version: "20.13.1"
+web_extra_exposed_ports:
+  - name: vite
+    container_port: 5173
+    http_port: 5173
+    https_port: 5174
+web_extra_daemons:
+  # Run vite in a separate process
+  - name: 'vite'
+    command: 'npm install && npm run build && npm run dev'
+    directory: /var/www/html
+disable_upload_dirs_warning: true
 
 # Key features of DDEV's config.yaml:
 

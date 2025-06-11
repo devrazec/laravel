@@ -63,8 +63,7 @@ DB_PASSWORD=root
 - ddev composer create laravel/laravel .
 - ddev composer require laravel/breeze --dev
 - ddev artisan breeze:install react
-- ddev npm install
-- ddev npm run dev
+
 - ddev artisan migrate:fresh
 - ddev artisan db:seed
 
@@ -106,3 +105,7 @@ docker run -itd \
   -p 8080:8080 \
   -p 5173:5173 \
   laravel
+
+docker exec laravel php artisan migrate:fresh --force
+
+docker run -p 8080:80 laravel

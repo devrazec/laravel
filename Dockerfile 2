@@ -1,0 +1,51 @@
+FROM node:20 AS js-builder
+
+# Set the working directory
+WORKDIR /var/www/html
+
+# Copy the package dependencies
+COPY package-lock.json ./
+COPY package.json ./
+
+# Install project dependencies
+RUN npm ci install
+
+# Copy the application code
+COPY . .
+
+RUN npm run build
+
+FROM dwchiang/nginx-php-fpm:latest
+
+
+
+# Set the working directory
+WORKDIR /var/www/html
+
+COPY . .
+
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install PHP extensions
+RUN docker-php-ext-install zip
+
+# Install project dependencies
+RUN composer install
+
+# Set permissions
+RUN chmod o+w ./storage/ -R
+RUN chmod o+w ./public/ -R
+RUN chmod o+w ./bootstrap/cache/ -R
+RUN chmod o+w ./database/ -R
+
+RUN php artisan migrate:fresh
+RUN php artisan db:seed
+
+# Copy the js project build
+COPY --from=js-builder /var/www/html/public/build ./public/build
+
+ENV DOCUMENT_ROOT=/var/www/html/public
+
+EXPOSE 8080
+EXPOSE 5173

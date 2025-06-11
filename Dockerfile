@@ -1,46 +1,45 @@
-FROM node:20 AS js-builder
+FROM php:8.3.11-fpm
 
-# Set the working directory
-WORKDIR /var/www/html
+# Update package list and install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libjpeg-dev \
+    libwebp-dev \
+    libxpm-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    oniguruma-dev \
+    icu-dev \
+    zip \
+    unzip \
+    git \
+    bash \
+    curl \
+    fcgiwrap \
+    libmcrypt-dev \
+    libonig-dev \
+    libpq-dev \
+    sqlite \
+    sqlite-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the package dependencies
-COPY package-lock.json ./
-COPY package.json ./
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install gd \
+    && docker-php-ext-install pdo pdo_pgsql pdo_sqlite mbstring zip exif pcntl bcmath opcache intl
 
-# Install project dependencies
-RUN npm ci install
+# Install Composer
+COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 
-# Copy the application code
-COPY . .
+# Copy existing application directory contents
+COPY . /var/www/html/
 
-RUN npm run build
+# Set ownership and permissions for the /var/www/html directory to www-data
+RUN chown -R www-data:www-data /var/www/html/
 
-FROM dwchiang/nginx-php-fpm:latest
+USER www-data
 
-# Set the working directory
-WORKDIR /var/www/html
+EXPOSE 9000
 
-COPY . .
-
-# Install composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Install project dependencies
-RUN composer install
-
-# Set permissions
-RUN chmod o+w ./storage/ -R
-RUN chmod o+w ./public/ -R
-RUN chmod o+w ./bootstrap/cache/ -R
-RUN chmod o+w ./database/ -R
-
-# Copy the js project build
-COPY --from=js-builder /var/www/html/public/build ./public/build
-
-RUN php artisan migrate:fresh
-RUN php artisan db:seed
-
-ENV DOCUMENT_ROOT=/var/www/html/public
-
-EXPOSE 8080
-EXPOSE 5173
+CMD ["php-fpm"]

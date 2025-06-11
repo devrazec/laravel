@@ -1,0 +1,47 @@
+# --- JavaScript Build Stage ---
+FROM node:20 AS js-builder
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY resources ./resources
+COPY vite.config.js ./
+RUN npm run build
+
+# --- PHP Build Stage ---
+FROM php:8.2-fpm-alpine AS php
+
+# Install build and runtime dependencies
+RUN apk add --no-cache \
+    bash curl git unzip sqlite sqlite-dev \
+    libzip-dev oniguruma-dev icu-dev zlib-dev \
+    && docker-php-ext-install \
+        pdo \
+        pdo_sqlite \
+        zip \
+        intl
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copy app source
+COPY . .
+
+# Install Laravel dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Copy Vite build
+COPY --from=js-builder /app/public/build ./public/build
+
+# Create SQLite file and set permissions
+RUN touch database/database.sqlite && \
+    chown -R www-data:www-data storage bootstrap/cache database
+
+USER www-data
+
+EXPOSE 9000
+CMD ["php-fpm"]
